@@ -1,300 +1,1345 @@
 <!DOCTYPE html>
+
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>JOVAFAM | Pedido</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
     <script>
+
         tailwind.config = {
+
             theme: {
+
                 extend: {
+
                     fontFamily: {
+
                         'display': ['Playfair Display', 'serif'],
+
                         'sans': ['Inter', 'sans-serif'],
+
                         'mono': ['Space Grotesk', 'monospace'],
+
                     },
+
                     colors: {
+
                         'luxury': {
+
                             900: '#0a0a0a', 800: '#141414', 700: '#1c1c1c',
+
                             600: '#2a2a2a', 500: '#3a3a3a',
+
                             gold: '#c9a96e', 'gold-light': '#e8d5a3', cream: '#f5f0e8',
+
                         }
+
                     }
+
                 }
+
             }
+
         }
+
     </script>
+
     <style>
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body { background-color: #0a0a0a; color: #f5f0e8; font-family: 'Inter', sans-serif; }
+
         .gold-shimmer {
+
             background: linear-gradient(90deg, #c9a96e 0%, #e8d5a3 25%, #c9a96e 50%, #e8d5a3 75%, #c9a96e 100%);
+
             background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+
             background-clip: text; animation: shimmer 3s linear infinite;
+
         }
+
         @keyframes shimmer { to { background-position: 200% center; } }
+
         ::-webkit-scrollbar { width: 6px; }
+
         ::-webkit-scrollbar-track { background: #0a0a0a; }
+
         ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 3px; }
+
         ::-webkit-scrollbar-thumb:hover { background: #c9a96e; }
-    </style>
+
+
+
+
+
+/* =========================================================
+
+   JOVAFAM — LIGHT LUXURY THEME
+
+   Adaptación clara, elegante y premium
+
+   ========================================================= */
+
+:root {
+
+    --jf-bg: #f7f5f0;
+
+    --jf-bg-top: #fbfaf7;
+
+    --jf-surface: #ffffff;
+
+    --jf-surface-soft: #f2eee7;
+
+    --jf-surface-muted: #ebe5db;
+
+    --jf-text: #1f2933;
+
+    --jf-text-soft: #667085;
+
+    --jf-text-muted: #98a2b3;
+
+    --jf-border: #ded7cb;
+
+    --jf-border-soft: #ebe6de;
+
+    --jf-gold: #b58a45;
+
+    --jf-gold-hover: #a97e3d;
+
+    --jf-gold-light: #d7bc84;
+
+    --jf-gold-soft: rgba(181, 138, 69, 0.10);
+
+    --jf-shadow: 0 12px 34px rgba(45, 38, 28, 0.08);
+
+    --jf-shadow-soft: 0 6px 18px rgba(45, 38, 28, 0.06);
+
+}
+
+html { color-scheme: light; }
+
+body {
+
+    background:
+
+        radial-gradient(circle at top left, rgba(215,188,132,.12), transparent 34%),
+
+        linear-gradient(180deg, var(--jf-bg-top) 0%, var(--jf-bg) 100%) !important;
+
+    color: var(--jf-text) !important;
+
+}
+
+
+
+/* Mapeo visual de las utilidades Tailwind existentes */
+
+.bg-luxury-900 { background-color: var(--jf-surface) !important; }
+
+.bg-luxury-900\/50 { background-color: rgba(255,255,255,.82) !important; }
+
+.bg-luxury-900\/80 { background-color: rgba(255,255,255,.92) !important; }
+
+.bg-luxury-900\/85 { background-color: rgba(255,255,255,.94) !important; }
+
+.bg-luxury-900\/90 { background-color: rgba(255,255,255,.95) !important; }
+
+.bg-luxury-900\/95 { background-color: rgba(255,255,255,.97) !important; }
+
+
+
+.bg-luxury-800 { background-color: var(--jf-surface) !important; }
+
+.bg-luxury-800\/20 { background-color: rgba(242,238,231,.50) !important; }
+
+.bg-luxury-800\/30 { background-color: rgba(242,238,231,.66) !important; }
+
+.bg-luxury-800\/50 { background-color: rgba(255,255,255,.88) !important; }
+
+
+
+.bg-luxury-700 { background-color: var(--jf-surface-muted) !important; }
+
+.bg-luxury-gold { background-color: var(--jf-gold) !important; }
+
+.bg-luxury-gold\/5 { background-color: rgba(181,138,69,.05) !important; }
+
+.bg-luxury-gold\/10 { background-color: rgba(181,138,69,.10) !important; }
+
+.bg-luxury-gold\/20 { background-color: rgba(181,138,69,.16) !important; }
+
+.bg-luxury-cream { background-color: var(--jf-gold) !important; }
+
+
+
+.text-luxury-cream,
+
+.text-luxury-900 { color: var(--jf-text) !important; }
+
+.text-luxury-400 { color: #475467 !important; }
+
+.text-luxury-500 { color: var(--jf-text-soft) !important; }
+
+.text-luxury-600 { color: var(--jf-text-muted) !important; }
+
+.text-luxury-gold { color: var(--jf-gold) !important; }
+
+.text-luxury-700\/50 { color: #d2c9bc !important; }
+
+
+
+.border-luxury-300 { border-color: #d8d1c6 !important; }
+
+.border-luxury-600 { border-color: #d4ccbf !important; }
+
+.border-luxury-600\/30 { border-color: rgba(212,204,191,.55) !important; }
+
+.border-luxury-700 { border-color: var(--jf-border) !important; }
+
+.border-luxury-700\/30 { border-color: rgba(222,215,203,.48) !important; }
+
+.border-luxury-700\/50 { border-color: rgba(222,215,203,.74) !important; }
+
+.border-luxury-gold { border-color: var(--jf-gold) !important; }
+
+.border-luxury-gold\/20 { border-color: rgba(181,138,69,.22) !important; }
+
+.border-luxury-gold\/30 { border-color: rgba(181,138,69,.32) !important; }
+
+.border-luxury-gold\/40 { border-color: rgba(181,138,69,.42) !important; }
+
+.border-luxury-gold\/50 { border-color: rgba(181,138,69,.54) !important; }
+
+
+
+.hover\:bg-luxury-gold:hover { background-color: var(--jf-gold-hover) !important; }
+
+.hover\:bg-luxury-gold-light:hover { background-color: var(--jf-gold-light) !important; }
+
+.hover\:bg-luxury-gold\/10:hover { background-color: rgba(181,138,69,.10) !important; }
+
+.hover\:bg-luxury-gold\/20:hover { background-color: rgba(181,138,69,.16) !important; }
+
+.hover\:bg-luxury-gold\/30:hover { background-color: rgba(181,138,69,.22) !important; }
+
+.hover\:text-luxury-cream:hover { color: var(--jf-text) !important; }
+
+.hover\:text-luxury-gold:hover { color: var(--jf-gold) !important; }
+
+.hover\:text-luxury-gold-light:hover { color: var(--jf-gold-light) !important; }
+
+.hover\:border-luxury-gold:hover { border-color: var(--jf-gold) !important; }
+
+.hover\:border-luxury-gold\/50:hover { border-color: rgba(181,138,69,.60) !important; }
+
+
+
+.focus\:border-luxury-gold:focus {
+
+    border-color: var(--jf-gold) !important;
+
+    box-shadow: 0 0 0 3px rgba(181,138,69,.10) !important;
+
+}
+
+.accent-luxury-gold { accent-color: var(--jf-gold) !important; }
+
+
+
+input:not([type="range"]):not([type="color"]):not([type="checkbox"]),
+
+textarea,
+
+select {
+
+    background-color: #fff !important;
+
+    color: var(--jf-text) !important;
+
+    border-color: var(--jf-border) !important;
+
+}
+
+input::placeholder,
+
+textarea::placeholder { color: #a1a7b0 !important; }
+
+select option { background:#fff; color:var(--jf-text); }
+
+
+
+.gold-shimmer {
+
+    background: linear-gradient(
+
+        90deg,
+
+        #9f7535 0%,
+
+        #d6b778 25%,
+
+        #ad8240 50%,
+
+        #e2ca98 75%,
+
+        #9f7535 100%
+
+    ) !important;
+
+    background-size: 200% auto !important;
+
+    -webkit-background-clip: text !important;
+
+    -webkit-text-fill-color: transparent !important;
+
+    background-clip: text !important;
+
+}
+
+
+
+::-webkit-scrollbar-track { background: var(--jf-surface-soft) !important; }
+
+::-webkit-scrollbar-thumb { background: #cfc7bb !important; }
+
+::-webkit-scrollbar-thumb:hover { background: var(--jf-gold) !important; }
+
+
+
+/* ===================== ORDER ===================== */
+
+body { min-height:100vh; }
+
+
+
+body > header {
+
+    background: rgba(255,255,255,.92) !important;
+
+    border-bottom: 1px solid rgba(222,215,203,.78) !important;
+
+    box-shadow: 0 8px 28px rgba(45,38,28,.05);
+
+}
+
+
+
+#order-content > .bg-luxury-800\/50 {
+
+    background: rgba(255,255,255,.92) !important;
+
+    border-color: rgba(222,215,203,.82) !important;
+
+    box-shadow: var(--jf-shadow-soft);
+
+}
+
+
+
+/* Contenedores de imágenes del diseño */
+
+#design-images .bg-luxury-900 {
+
+    background: #f3efe8 !important;
+
+}
+
+#design-images .bg-luxury-800\/50 {
+
+    background: rgba(255,255,255,.86) !important;
+
+}
+
+
+
+/* Pantallas de error/configuración */
+
+#error-config input {
+
+    background:#fff !important;
+
+    color:var(--jf-text) !important;
+
+}
+
+#error-notfound,
+
+#error-config,
+
+#loading {
+
+    color: var(--jf-text);
+
+}
+
+
+
+/* Spinner */
+
+#loading .border-luxury-gold\/20 {
+
+    border-color: rgba(181,138,69,.20) !important;
+
+}
+
+#loading .border-t-luxury-gold {
+
+    border-top-color: var(--jf-gold) !important;
+
+}
+
+
+
+/* Insignias de error y estado */
+
+.bg-red-500\/10 {
+
+    background-color: rgba(220,38,38,.07) !important;
+
+}
+
+
+
+
+
+/* ===== VISOR DE DISEÑO POR COLOR / VISTA ===== */
+
+.order-design-toolbar { margin-bottom: 16px; }
+
+.order-color-tabs,
+
+.order-view-tabs {
+
+    display: flex;
+
+    gap: 8px;
+
+    overflow-x: auto;
+
+    padding: 2px 2px 8px;
+
+    scrollbar-width: thin;
+
+}
+
+.order-color-btn,
+
+.order-view-btn {
+
+    flex: 0 0 auto;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 12px;
+
+    border-radius: 999px;
+
+    border: 1px solid var(--jf-border);
+
+    background: #fff;
+
+    color: var(--jf-text-soft);
+
+    font-size: 11px;
+
+    transition: .2s ease;
+
+}
+
+.order-color-btn:hover,
+
+.order-view-btn:hover {
+
+    border-color: rgba(181,138,69,.55);
+
+    color: var(--jf-gold);
+
+}
+
+.order-color-btn.active,
+
+.order-view-btn.active {
+
+    border-color: var(--jf-gold);
+
+    color: var(--jf-gold);
+
+    background: rgba(181,138,69,.09);
+
+    box-shadow: 0 0 0 2px rgba(181,138,69,.06);
+
+}
+
+.order-color-dot {
+
+    width: 16px;
+
+    height: 16px;
+
+    border-radius: 50%;
+
+    border: 2px solid #fff;
+
+    box-shadow: 0 0 0 1px rgba(45,38,28,.20);
+
+}
+
+.order-design-stage {
+
+    min-height: 320px;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--jf-border-soft);
+
+    background: #f7f4ee;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+.order-design-stage img {
+
+    width: 100%;
+
+    max-height: 650px;
+
+    object-fit: contain;
+
+    display: block;
+
+}
+
+.order-design-meta {
+
+    padding: 10px 12px;
+
+    border-top: 1px solid var(--jf-border-soft);
+
+    background: rgba(255,255,255,.88);
+
+    font-size: 11px;
+
+    color: var(--jf-text-soft);
+
+}
+
+
+
+</style>
+
 <base target="_blank">
+
 </head>
+
 <body class="bg-luxury-900 text-luxury-cream min-h-screen">
 
+
+
     <header class="bg-luxury-900/90 backdrop-blur-xl border-b border-luxury-700/30 sticky top-0 z-50">
+
         <div class="max-w-7xl mx-auto px-4 lg:px-8">
+
             <div class="flex items-center justify-between h-16">
-                <a href="index.html" class="flex items-center gap-3">
+
+                <a href="inicio.html" class="flex items-center gap-3">
+
                     <div class="w-8 h-8 border border-luxury-gold/50 rounded-full flex items-center justify-center">
+
                         <span class="font-display text-luxury-gold text-sm">J</span>
+
                     </div>
+
                     <span class="font-display text-xl text-luxury-cream">JOVAFAM</span>
+
                 </a>
+
             </div>
+
         </div>
+
     </header>
 
+
+
     <main class="max-w-3xl mx-auto px-4 lg:px-8 py-12">
+
         <div id="loading" class="text-center py-20">
+
             <div class="w-12 h-12 border-2 border-luxury-gold/20 border-t-luxury-gold rounded-full animate-spin mx-auto mb-4"></div>
+
             <p class="text-luxury-500 font-mono text-sm">Cargando pedido...</p>
+
         </div>
+
+
 
         <div id="error-notfound" class="hidden text-center py-20">
+
             <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+
                 <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+
             </div>
+
             <h2 class="font-display text-2xl text-luxury-cream mb-2">Pedido no encontrado</h2>
+
             <p class="text-luxury-500">El enlace puede haber expirado o ser incorrecto.</p>
+
         </div>
+
+
 
         <div id="error-config" class="hidden text-center py-12">
+
             <div class="w-16 h-16 rounded-full bg-luxury-gold/10 flex items-center justify-center mx-auto mb-4">
+
                 <svg class="w-8 h-8 text-luxury-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+
             </div>
+
             <h2 class="font-display text-2xl text-luxury-cream mb-2">Configuracion necesaria</h2>
+
             <p class="text-luxury-500 mb-6 max-w-md mx-auto">Este dispositivo no tiene la conexion a Supabase configurada. Pega aqui los datos de tu proyecto para ver el pedido.</p>
+
             <div class="max-w-sm mx-auto space-y-3 text-left">
+
                 <div>
+
                     <label class="block font-mono text-[10px] uppercase tracking-wider text-luxury-500 mb-1">Supabase URL</label>
-                    <input type="text" id="cfg-url" placeholder="https://tu-proyecto.supabase.co" class="w-full bg-luxury-800 border border-luxury-700 rounded-lg px-3 py-2 text-luxury-cream text-sm focus:border-luxury-gold focus:outline-none">
+
+                    <input type="text" id="cfg-url" placeholder="https://xpdmnecyhhzsmujgptwg.supabase.co" class="w-full bg-luxury-800 border border-luxury-700 rounded-lg px-3 py-2 text-luxury-cream text-sm focus:border-luxury-gold focus:outline-none">
+
                 </div>
+
                 <div>
+
                     <label class="block font-mono text-[10px] uppercase tracking-wider text-luxury-500 mb-1">Supabase Anon Key</label>
+
                     <input type="password" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs..." class="w-full bg-luxury-800 border border-luxury-700 rounded-lg px-3 py-2 text-luxury-cream text-sm focus:border-luxury-gold focus:outline-none">
+
                 </div>
+
                 <button onclick="saveAndRetry()" class="w-full py-2.5 bg-luxury-gold text-luxury-900 rounded-lg font-mono text-xs uppercase tracking-wider font-semibold hover:bg-luxury-gold-light transition-colors">
+
                     Guardar y Ver Pedido
+
                 </button>
+
                 <p class="text-[10px] text-luxury-600 text-center">Los encuentras en Supabase > Project Settings > API</p>
+
             </div>
+
         </div>
+
+
 
         <div id="order-content" class="hidden space-y-8">
+
             <div class="text-center">
+
                 <span class="font-mono text-xs uppercase tracking-[0.3em] text-luxury-gold mb-2 block">Pedido Confirmado</span>
+
                 <h1 class="font-display text-4xl md:text-5xl text-luxury-cream mb-2">Pedido <span id="order-id" class="gold-shimmer"></span></h1>
+
                 <p class="text-luxury-500 text-sm" id="order-date"></p>
+
                 <div id="payment-badge" class="mt-3"></div>
+
             </div>
 
+
+
             <div class="bg-luxury-800/50 border border-luxury-700/50 rounded-2xl p-6 md:p-8">
+
                 <h2 class="font-mono text-xs uppercase tracking-widest text-luxury-gold mb-6">Datos del Cliente</h2>
+
                 <div class="grid md:grid-cols-2 gap-4 text-sm">
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Nombre</span><span id="customer-name" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Correo</span><span id="customer-email" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Telefono</span><span id="customer-phone" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Pais</span><span id="customer-country" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Ciudad</span><span id="customer-city" class="text-luxury-cream"></span></div>
+
                     <div class="md:col-span-2"><span class="text-luxury-500 block text-xs mb-1">Direccion completa</span><span id="customer-address" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Apartamento / Casa / Interior / Info adicional</span><span id="customer-address-extra" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Codigo postal</span><span id="customer-postal" class="text-luxury-cream"></span></div>
+
                 </div>
+
             </div>
 
+
+
             <div class="bg-luxury-800/50 border border-luxury-700/50 rounded-2xl p-6 md:p-8">
+
                 <h2 class="font-mono text-xs uppercase tracking-widest text-luxury-gold mb-6">Estado de Pago</h2>
+
                 <div id="payment-info" class="mb-4"></div>
+
             </div>
 
+
+
             <div class="bg-luxury-800/50 border border-luxury-700/50 rounded-2xl p-6 md:p-8">
+
                 <h2 class="font-mono text-xs uppercase tracking-widest text-luxury-gold mb-6">Producto</h2>
+
                 <div class="grid md:grid-cols-2 gap-4 text-sm">
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Producto</span><span id="product-name" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Talla</span><span id="product-size" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Color</span><span id="product-color" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Cantidad</span><span id="product-qty" class="text-luxury-cream"></span></div>
+
                     <div><span class="text-luxury-500 block text-xs mb-1">Precio total</span><span id="product-price" class="text-luxury-gold font-mono text-lg"></span></div>
+
                 </div>
+
             </div>
 
+
+
             <div class="bg-luxury-800/50 border border-luxury-700/50 rounded-2xl p-6 md:p-8">
+
                 <h2 class="font-mono text-xs uppercase tracking-widest text-luxury-gold mb-6">Diseno Personalizado</h2>
-                <div id="design-images" class="space-y-4"></div>
+
+                <div id="design-color-block" class="order-design-toolbar hidden">
+
+                    <div class="flex items-center justify-between gap-3 mb-2">
+
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-luxury-500">Color</span>
+
+                        <span id="design-active-color-name" class="text-xs text-luxury-gold"></span>
+
+                    </div>
+
+                    <div id="design-color-tabs" class="order-color-tabs"></div>
+
+                </div>
+
+                <div id="design-view-block" class="order-design-toolbar hidden">
+
+                    <div class="flex items-center justify-between gap-3 mb-2">
+
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-luxury-500">Vista</span>
+
+                        <span id="design-active-view-name" class="text-xs text-luxury-gold"></span>
+
+                    </div>
+
+                    <div id="design-view-tabs" class="order-view-tabs"></div>
+
+                </div>
+
+                <div id="design-images"></div>
+
             </div>
+
         </div>
+
     </main>
 
+
+
     <script>
+
         // ============================================================
+
         // CONFIGURACION - EDITA ESTAS 2 LINEAS CON TUS DATOS REALES
+
         // Encuentralos en: Supabase > Project Settings > API
+
         // ============================================================
-        var HARDCODED_URL = '';
-        var HARDCODED_KEY = '';
+
+        // En Netlify puedes dejar estos vacios y usar la configuracion guardada en el navegador.
+
+        // Cuando terminemos la configuracion, pondremos aqui la URL y anon key de Supabase.
+
+        var HARDCODED_URL = 'https://xpdmnecyhhzsmujgptwg.supabase.co';
+
+        var HARDCODED_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZG1uZWN5aGh6c211amdwdHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4MDc1MTgsImV4cCI6MjEwMjM4MzUxOH0.lSD7nM6lOIgULpQ0pvJ3HutKClbtXIbTgApvT5Y0E1M';
+
         // ============================================================
+
+
 
         function getSupabaseConfig() {
+
             if (HARDCODED_URL && HARDCODED_KEY) {
+
                 return { url: HARDCODED_URL, key: HARDCODED_KEY };
+
             }
+
             try {
+
                 var saved = localStorage.getItem('jovafam_supabase');
+
                 if (saved) {
+
                     var cfg = JSON.parse(saved);
+
                     if (cfg.url && cfg.key) return cfg;
+
                 }
+
             } catch(e) {}
+
             return null;
+
         }
+
+
 
         function saveConfig(url, key) {
+
             try { localStorage.setItem('jovafam_supabase', JSON.stringify({ url: url, key: key })); } catch(e) {}
+
         }
 
+
+
         function saveAndRetry() {
+
             var url = document.getElementById('cfg-url').value.trim();
+
             var key = document.getElementById('cfg-key').value.trim();
+
             if (!url || !key) { alert('Completa ambos campos'); return; }
+
             saveConfig(url, key);
+
             location.reload();
+
         }
+
+
 
         var sbClient = null;
 
+
+
         function initSupabase() {
+
             var cfg = getSupabaseConfig();
+
             if (!cfg) return false;
+
             if (!window.supabase || !window.supabase.createClient) return false;
+
             try {
+
                 sbClient = window.supabase.createClient(cfg.url, cfg.key);
+
                 return true;
+
             } catch(e) {
+
                 console.error('Error creando cliente:', e);
+
                 return false;
+
             }
+
         }
+
+
 
         async function loadOrder() {
+
             var timeoutId = setTimeout(function() {
+
                 showScreen('error-notfound');
+
             }, 15000);
 
+
+
             var hasSupabase = initSupabase();
+
             if (!hasSupabase) {
+
                 clearTimeout(timeoutId);
+
                 showScreen('error-config');
+
                 return;
+
             }
+
+
 
             var params = new URLSearchParams(window.location.search);
+
             var token = params.get('token');
 
+
+
             if (!token) {
+
                 clearTimeout(timeoutId);
+
                 showScreen('error-notfound');
+
                 return;
+
             }
+
+
 
             try {
+
                 var result = await sbClient.rpc('get_order_by_token', { p_token: token });
+
                 clearTimeout(timeoutId);
+
+
 
                 if (result.error) {
+
                     console.error('RPC error:', result.error);
+
                     showScreen('error-notfound');
+
                     return;
+
                 }
+
                 if (!result.data || result.data.length === 0) {
+
                     showScreen('error-notfound');
+
                     return;
+
                 }
+
+
 
                 displayOrder(result.data[0]);
+
             } catch (err) {
+
                 clearTimeout(timeoutId);
+
                 console.error('Exception:', err);
+
                 showScreen('error-notfound');
+
             }
+
         }
+
+
 
         function showScreen(screenId) {
+
             var ids = ['loading', 'error-notfound', 'error-config', 'order-content'];
+
             for (var i = 0; i < ids.length; i++) {
+
                 var el = document.getElementById(ids[i]);
+
                 if (el) {
+
                     if (ids[i] === screenId) el.classList.remove('hidden');
+
                     else el.classList.add('hidden');
+
                 }
+
             }
+
         }
 
-        function displayOrder(order) {
-            showScreen('order-content');
 
-            document.getElementById('order-id').textContent = '#' + (order.order_id || '???');
-            document.getElementById('order-date').textContent = order.created_at
-                ? new Date(order.created_at).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' })
-                : '';
 
-            document.getElementById('customer-name').textContent = order.customer_name || '-';
-            document.getElementById('customer-email').textContent = order.customer_email || '-';
-            document.getElementById('customer-phone').textContent = order.customer_phone || '-';
-            document.getElementById('customer-country').textContent = order.country || '-';
-            document.getElementById('customer-city').textContent = order.city || '-';
-            document.getElementById('customer-address').textContent = order.address || '-';
-            document.getElementById('customer-address-extra').textContent = order.address_extra || 'No especificado';
-            document.getElementById('customer-postal').textContent = order.postal_code || 'No especificado';
+        var orderDesignGroups = [];
 
-            document.getElementById('product-name').textContent = order.product_name || '-';
-            document.getElementById('product-size').textContent = order.product_size || 'No especificado';
-            document.getElementById('product-color').textContent = order.product_color || '-';
-            document.getElementById('product-qty').textContent = order.quantity || '-';
-            document.getElementById('product-price').textContent = '$' + (parseFloat(order.total_price) || 0).toFixed(2);
+        var activeDesignColorKey = null;
+
+        var activeDesignViewIndex = 0;
+
+
+
+        function escapeOrderHtml(value) {
+
+            return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+
+            });
+
+        }
+
+
+
+        function normalizeViewName(view) {
+
+            var raw = String(view?.view || view?.viewName || '').trim();
+
+            if (!raw) return 'Vista';
+
+            // Los pedidos del editor suelen guardar "Color - Frente".
+
+            if (view?.colorName && raw.toLowerCase().indexOf(String(view.colorName).toLowerCase()) === 0) {
+
+                raw = raw.slice(String(view.colorName).length).replace(/^\s*[-–—:]\s*/, '');
+
+            }
+
+            if (raw.indexOf('Producto catálogo - ') === 0 && view?.colorName) {
+
+                var prefix = 'Producto catálogo - ' + view.colorName + ' - ';
+
+                if (raw.indexOf(prefix) === 0) raw = raw.slice(prefix.length);
+
+            }
+
+            return raw || 'Vista';
+
+        }
+
+
+
+        function makeColorKey(view, index) {
+
+            var id = String(view?.colorId || '').trim();
+
+            var name = String(view?.colorName || '').trim();
+
+            return id || name || ('design-' + index);
+
+        }
+
+
+
+        function buildDesignGroups(views) {
+
+            var map = new Map();
+
+            (views || []).forEach(function(view, index) {
+
+                if (!view || !view.url) return;
+
+                var key = makeColorKey(view, index);
+
+                var name = String(view.colorName || '').trim() || 'Diseño';
+
+                if (!map.has(key)) {
+
+                    map.set(key, {
+
+                        key: key,
+
+                        name: name,
+
+                        hex: String(view.colorHex || view.hex || '').trim(),
+
+                        quantity: Number(view.quantity || 0),
+
+                        views: []
+
+                    });
+
+                }
+
+                map.get(key).views.push({
+
+                    url: String(view.url || '').trim(),
+
+                    name: normalizeViewName(view),
+
+                    raw: view
+
+                });
+
+            });
+
+            return Array.from(map.values());
+
+        }
+
+
+
+        function selectDesignColor(key) {
+
+            if (!orderDesignGroups.some(function(group){ return group.key === key; })) return;
+
+            activeDesignColorKey = key;
+
+            activeDesignViewIndex = 0;
+
+            renderDesignViewer();
+
+        }
+
+
+
+        function selectDesignView(index) {
+
+            var group = orderDesignGroups.find(function(item){ return item.key === activeDesignColorKey; });
+
+            if (!group || !group.views[index]) return;
+
+            activeDesignViewIndex = index;
+
+            renderDesignViewer();
+
+        }
+
+
+
+        function renderDesignViewer() {
+
+            var colorBlock = document.getElementById('design-color-block');
+
+            var colorTabs = document.getElementById('design-color-tabs');
+
+            var colorName = document.getElementById('design-active-color-name');
+
+            var viewBlock = document.getElementById('design-view-block');
+
+            var viewTabs = document.getElementById('design-view-tabs');
+
+            var viewName = document.getElementById('design-active-view-name');
 
             var designContainer = document.getElementById('design-images');
-            designContainer.innerHTML = '';
 
-            var views = order.design_views;
-            if (typeof views === 'string') {
-                try { views = JSON.parse(views); } catch(e) { views = []; }
-            }
-            if (!Array.isArray(views)) views = [];
 
-            if (views.length > 0) {
-                for (var i = 0; i < views.length; i++) {
-                    var view = views[i];
-                    var label = view.view || (i === 0 ? 'Diseno Principal' : 'Vista ' + (i + 1));
-                    var div = document.createElement('div');
-                    div.className = 'rounded-xl overflow-hidden border border-luxury-700/50 bg-luxury-900' + (i > 0 ? ' mt-4' : '');
-                    div.innerHTML = '<div class="px-4 py-2 bg-luxury-800/50 border-b border-luxury-700/30"><span class="font-mono text-xs text-luxury-gold uppercase">' + label + '</span></div><img src="' + view.url + '" alt="' + label + '" class="w-full h-auto max-h-[600px] object-contain" onerror="this.style.display=\'none\'">';
-                    designContainer.appendChild(div);
-                }
-            } else if (order.design_url) {
-                var div = document.createElement('div');
-                div.className = 'rounded-xl overflow-hidden border border-luxury-700/50 bg-luxury-900';
-                div.innerHTML = '<img src="' + order.design_url + '" alt="Diseno del pedido" class="w-full h-auto max-h-[600px] object-contain" onerror="this.style.display=\'none\'">';
-                designContainer.appendChild(div);
-            } else {
-                designContainer.innerHTML = '<p class="text-luxury-500 text-sm">No hay imagen del diseno disponible.</p>';
+
+            if (!orderDesignGroups.length) {
+
+                if (colorBlock) colorBlock.classList.add('hidden');
+
+                if (viewBlock) viewBlock.classList.add('hidden');
+
+                designContainer.innerHTML = '<p class="text-luxury-500 text-sm">No hay imagen del diseño disponible.</p>';
+
+                return;
+
             }
+
+
+
+            var group = orderDesignGroups.find(function(item){ return item.key === activeDesignColorKey; }) || orderDesignGroups[0];
+
+            activeDesignColorKey = group.key;
+
+            if (!group.views[activeDesignViewIndex]) activeDesignViewIndex = 0;
+
+            var selectedView = group.views[activeDesignViewIndex];
+
+
+
+            // Mostrar botones de color solo cuando realmente hay más de un color/grupo.
+
+            colorBlock.classList.toggle('hidden', orderDesignGroups.length <= 1);
+
+            colorName.textContent = group.name + (group.quantity ? ' · ' + group.quantity + ' ud.' : '');
+
+            colorTabs.innerHTML = orderDesignGroups.map(function(item) {
+
+                var active = item.key === group.key;
+
+                var dot = item.hex ? '<span class="order-color-dot" style="background:' + escapeOrderHtml(item.hex) + '"></span>' : '';
+
+                return '<button type="button" class="order-color-btn ' + (active ? 'active' : '') + '" data-color-key="' + escapeOrderHtml(item.key) + '">' + dot + '<span>' + escapeOrderHtml(item.name) + '</span>' + (item.quantity ? '<span class="font-mono">' + item.quantity + '</span>' : '') + '</button>';
+
+            }).join('');
+
+            colorTabs.querySelectorAll('[data-color-key]').forEach(function(btn) {
+
+                btn.addEventListener('click', function(){ selectDesignColor(btn.dataset.colorKey); });
+
+            });
+
+
+
+            viewBlock.classList.toggle('hidden', group.views.length <= 1);
+
+            viewName.textContent = selectedView?.name || 'Vista';
+
+            viewTabs.innerHTML = group.views.map(function(item, index) {
+
+                return '<button type="button" class="order-view-btn ' + (index === activeDesignViewIndex ? 'active' : '') + '" data-view-index="' + index + '">' + escapeOrderHtml(item.name) + '</button>';
+
+            }).join('');
+
+            viewTabs.querySelectorAll('[data-view-index]').forEach(function(btn) {
+
+                btn.addEventListener('click', function(){ selectDesignView(Number(btn.dataset.viewIndex)); });
+
+            });
+
+
+
+            if (!selectedView?.url) {
+
+                designContainer.innerHTML = '<p class="text-luxury-500 text-sm">No hay imagen para esta vista.</p>';
+
+                return;
+
+            }
+
+
+
+            designContainer.innerHTML =
+
+                '<div class="order-design-stage">' +
+
+                    '<img src="' + escapeOrderHtml(selectedView.url) + '" alt="' + escapeOrderHtml(group.name + ' - ' + selectedView.name) + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<p class=&quot;text-luxury-500 text-sm p-6&quot;>No se pudo cargar esta imagen.</p>\'">' +
+
+                '</div>' +
+
+                '<div class="order-design-meta">' +
+
+                    '<strong>' + escapeOrderHtml(group.name) + '</strong> · ' + escapeOrderHtml(selectedView.name) +
+
+                    (group.quantity ? ' · Cantidad: ' + group.quantity : '') +
+
+                '</div>';
+
         }
 
+
+
+        function displayOrder(order) {
+
+            showScreen('order-content');
+
+
+
+            document.getElementById('order-id').textContent = '#' + (order.order_id || '???');
+
+            document.getElementById('order-date').textContent = order.created_at
+
+                ? new Date(order.created_at).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' })
+
+                : '';
+
+
+
+            document.getElementById('customer-name').textContent = order.customer_name || '-';
+
+            document.getElementById('customer-email').textContent = order.customer_email || '-';
+
+            document.getElementById('customer-phone').textContent = order.customer_phone || '-';
+
+            document.getElementById('customer-country').textContent = order.country || '-';
+
+            document.getElementById('customer-city').textContent = order.city || '-';
+
+            document.getElementById('customer-address').textContent = order.address || '-';
+
+            document.getElementById('customer-address-extra').textContent = order.address_extra || 'No especificado';
+
+            document.getElementById('customer-postal').textContent = order.postal_code || 'No especificado';
+
+
+
+            document.getElementById('product-name').textContent = order.product_name || '-';
+
+            document.getElementById('product-size').textContent = order.product_size || 'No especificado';
+
+            document.getElementById('product-color').textContent = order.product_color || '-';
+
+            document.getElementById('product-qty').textContent = order.quantity || '-';
+
+            document.getElementById('product-price').textContent = '$' + (parseFloat(order.total_price) || 0).toFixed(2);
+
+
+
+            var designContainer = document.getElementById('design-images');
+
+            designContainer.innerHTML = '';
+
+
+
+            var views = order.design_views;
+
+            if (typeof views === 'string') {
+
+                try { views = JSON.parse(views); } catch(e) { views = []; }
+
+            }
+
+            if (!Array.isArray(views)) views = [];
+
+
+
+            // Compatibilidad con pedidos antiguos que solo tienen design_url.
+
+            if (!views.length && order.design_url) {
+
+                views = [{
+
+                    view: 'Diseño principal',
+
+                    url: order.design_url,
+
+                    colorId: 'legacy',
+
+                    colorName: order.product_color || 'Diseño'
+
+                }];
+
+            }
+
+
+
+            orderDesignGroups = buildDesignGroups(views);
+
+            activeDesignColorKey = orderDesignGroups[0]?.key || null;
+
+            activeDesignViewIndex = 0;
+
+            renderDesignViewer();
+
+
+
+        }
+
+
+
         document.addEventListener('DOMContentLoaded', loadOrder);
+
     </script>
+
 </body>
+
 </html>

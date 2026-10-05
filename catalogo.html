@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOVAFAM | Catálogo de Prendas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                fontFamily: { display:['Playfair Display','serif'], sans:['Inter','sans-serif'], mono:['Space Grotesk','monospace'] },
+                colors: { luxury:{ 900:'#0a0a0a',800:'#141414',700:'#1c1c1c',600:'#2a2a2a',500:'#3a3a3a',gold:'#c9a96e','gold-light':'#e8d5a3',cream:'#f5f0e8' } }
+            }}
+        };
+    </script>
+    <style>
+        *{box-sizing:border-box} html{scroll-behavior:smooth;color-scheme:light}
+        :root{--bg:#f7f5f0;--surface:#fff;--soft:#f2eee7;--muted:#ebe5db;--text:#1f2933;--text2:#667085;--border:#ded7cb;--gold:#b58a45;--gold2:#d7bc84;--shadow:0 16px 45px rgba(45,38,28,.09)}
+        body{margin:0;background:radial-gradient(circle at 10% 0%,rgba(215,188,132,.14),transparent 32%),linear-gradient(180deg,#fbfaf7,var(--bg));color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+        .gold-shimmer{background:linear-gradient(90deg,#9f7535,#d6b778,#ad8240,#e2ca98,#9f7535);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s linear infinite}@keyframes shimmer{to{background-position:200% center}}
+        .card{background:rgba(255,255,255,.92);border:1px solid rgba(222,215,203,.8);box-shadow:0 8px 25px rgba(45,38,28,.055);transition:.35s ease}.card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:rgba(181,138,69,.35)}
+        .product-image{transition:transform .55s cubic-bezier(.4,0,.2,1)}.card:hover .product-image{transform:scale(1.04)}
+        .btn{transition:.25s ease}.btn:hover{transform:translateY(-1px)}
+        .modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(31,41,51,.38);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:18px}.modal.active{display:flex}.modal-box{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:0 30px 90px rgba(31,41,51,.2);width:100%;max-height:92vh;overflow-y:auto}
+        .color-choice{width:38px;height:38px;border-radius:999px;border:2px solid #d8d1c6;box-shadow:0 2px 7px rgba(40,34,25,.08);transition:.2s}.color-choice:hover{transform:scale(1.08)}.color-choice.active{border-color:var(--gold);box-shadow:0 0 0 3px rgba(181,138,69,.16)}
+        .view-choice{border:1px solid var(--border);background:#fff;border-radius:12px;padding:8px;transition:.2s;cursor:pointer;text-align:center}.view-choice:hover{border-color:rgba(181,138,69,.55);transform:translateY(-1px)}.view-choice.active{border-color:var(--gold);box-shadow:0 0 0 3px rgba(181,138,69,.10)}.view-choice.disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.8)}
+        .view-thumb{aspect-ratio:1/1;border-radius:9px;background:var(--soft);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:6px}.view-thumb img{width:100%;height:100%;object-fit:contain;padding:3px}
+        #size-modal{z-index:220}#order-modal{z-index:230}#size-options button{touch-action:manipulation;pointer-events:auto;user-select:none}
+        input,textarea,select{background:#fff!important;color:var(--text)!important;border:1px solid var(--border)!important;outline:none}input:focus,textarea:focus,select:focus{border-color:var(--gold)!important;box-shadow:0 0 0 3px rgba(181,138,69,.09)}
+        ::-webkit-scrollbar{width:7px}::-webkit-scrollbar-track{background:#f2eee7}::-webkit-scrollbar-thumb{background:#cfc7bb;border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+        .spinner{width:36px;height:36px;border:3px solid rgba(181,138,69,.18);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+        .product-viewer{background:linear-gradient(180deg,#faf8f4 0%,#f2eee7 100%);border:1px solid var(--border);border-radius:22px;padding:14px}
+        .viewer-color-bar{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 9px;scrollbar-width:thin}
+        .viewer-color-btn{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--text2);font-size:11px;transition:.2s}
+        .viewer-color-btn:hover{border-color:rgba(181,138,69,.55);color:var(--gold)}.viewer-color-btn.active{border-color:var(--gold);background:rgba(181,138,69,.08);color:var(--gold);box-shadow:0 0 0 2px rgba(181,138,69,.07)}
+        .viewer-color-dot{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(45,38,28,.2)}
+        .viewer-stage{position:relative;aspect-ratio:4/5;max-height:560px;border-radius:18px;background:#fff;border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center}
+        .viewer-stage img{width:100%;height:100%;object-fit:contain;padding:14px}
+        .viewer-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid var(--border);box-shadow:0 5px 18px rgba(45,38,28,.12);display:flex;align-items:center;justify-content:center;color:var(--text2);transition:.2s;z-index:3}.viewer-nav:hover{color:var(--gold);border-color:rgba(181,138,69,.55)}.viewer-nav.prev{left:10px}.viewer-nav.next{right:10px}
+        .viewer-view-bar{display:flex;gap:7px;overflow-x:auto;padding-top:10px;scrollbar-width:thin}.viewer-view-btn{flex:0 0 auto;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text2);font:500 10px 'Space Grotesk',monospace;text-transform:uppercase;letter-spacing:.04em;transition:.2s}.viewer-view-btn:hover{border-color:rgba(181,138,69,.55);color:var(--gold)}.viewer-view-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}.viewer-view-btn.disabled{opacity:.35;cursor:not-allowed}
+        .selection-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--border);background:#fbfaf7;border-radius:14px}
+        @media(max-width:640px){.viewer-stage{max-height:440px}.viewer-color-btn{padding:7px 9px}.viewer-nav{width:34px;height:34px}}
+
+    </style>
+</head>
+<body>
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[#ded7cb]/80">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 h-18 py-4 flex items-center justify-between gap-4">
+        <a href="inicio.html" class="flex items-center gap-3">
+            <div class="w-10 h-10 border border-[#b58a45]/50 rounded-full flex items-center justify-center"><span class="font-display text-[#b58a45] text-lg">J</span></div>
+            <div><span class="font-display text-xl md:text-2xl">JOVAFAM</span><span class="hidden sm:inline font-mono text-[10px] uppercase tracking-widest text-[#b58a45] ml-2">Catálogo</span></div>
+        </a>
+        <nav class="flex items-center gap-2 sm:gap-4">
+            <a href="inicio.html" class="px-3 py-2 text-xs font-mono uppercase tracking-wider text-[#667085] hover:text-[#b58a45]">Inicio</a>
+            <a href="editor.html" class="hidden sm:inline-flex px-4 py-2 rounded-lg border border-[#ded7cb] text-xs font-mono uppercase tracking-wider text-[#667085] hover:border-[#b58a45] hover:text-[#b58a45]">Crear mi diseño</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="py-16 md:py-24">
+        <div class="max-w-7xl mx-auto px-5 lg:px-8 text-center">
+            <span class="font-mono text-xs uppercase tracking-[.28em] text-[#b58a45]">Colección JOVAFAM</span>
+            <h1 class="font-display text-5xl md:text-7xl mt-4 mb-5">Prendas listas para <span class="italic gold-shimmer">comprar</span></h1>
+            <p class="max-w-2xl mx-auto text-[#667085] text-base md:text-lg leading-relaxed">Diseños creados y publicados por nosotros. Escoge tu prenda favorita, color, cantidad y combina varios colores y tallas dentro del mismo pedido.</p>
+        </div>
+    </section>
+
+    <section class="pb-24">
+        <div class="max-w-7xl mx-auto px-5 lg:px-8">
+            <div class="card rounded-2xl p-4 mb-8 flex flex-col md:flex-row gap-3 md:items-center">
+                <div class="relative flex-1"><i data-lucide="search" class="w-4 h-4 text-[#98a2b3] absolute left-3 top-1/2 -translate-y-1/2"></i><input id="catalog-search" oninput="renderCatalog()" type="search" placeholder="Buscar camiseta, hoodie, estilo..." class="w-full rounded-xl pl-10 pr-4 py-3 text-sm"></div>
+                <select id="category-filter" onchange="renderCatalog()" class="rounded-xl px-4 py-3 text-sm min-w-48"><option value="">Todas las categorías</option></select>
+            </div>
+
+            <div id="catalog-loading" class="py-20 flex flex-col items-center gap-4 text-[#667085]"><div class="spinner"></div><span class="text-sm">Cargando catálogo...</span></div>
+            <div id="catalog-grid" class="hidden grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            <div id="catalog-empty" class="hidden card rounded-2xl py-16 px-6 text-center"><h2 class="font-display text-2xl mb-2">No hay prendas disponibles</h2><p class="text-[#667085] text-sm">Prueba otro filtro o vuelve pronto para ver nuevas publicaciones.</p></div>
+        </div>
+    </section>
+</main>
+
+<!-- PRODUCT DETAIL -->
+<div id="product-modal" class="modal" onclick="if(event.target===this)closeProductModal()">
+    <div class="modal-box max-w-5xl" onclick="event.stopPropagation()">
+        <div class="flex justify-end p-3 pb-0"><button onclick="closeProductModal()" class="w-10 h-10 rounded-full bg-[#f2eee7] hover:bg-[#ebe5db] flex items-center justify-center"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+        <div class="grid lg:grid-cols-2 gap-0">
+            <div class="p-5 md:p-8 pt-2">
+                <div class="product-viewer">
+                    <div class="flex items-center justify-between gap-3 mb-2"><div><span class="font-mono text-[10px] uppercase tracking-wider text-[#667085]">Color para visualizar</span><div id="selected-color-name" class="text-xs font-medium mt-1"></div></div><span class="text-[10px] text-[#98a2b3]">Cambia color sin salir de la foto</span></div>
+                    <div id="detail-colors" class="viewer-color-bar"></div>
+                    <div class="viewer-stage">
+                        <img id="detail-image" class="hidden" alt="">
+                        <div id="detail-no-image" class="text-[#98a2b3] text-sm">Imagen no disponible</div>
+                        <button type="button" class="viewer-nav prev" onclick="cycleProductView(-1)" aria-label="Vista anterior">‹</button>
+                        <button type="button" class="viewer-nav next" onclick="cycleProductView(1)" aria-label="Vista siguiente">›</button>
+                    </div>
+                    <div class="flex items-center justify-between mt-3"><span class="font-mono text-[10px] uppercase tracking-wider text-[#667085]">Vista</span><span id="selected-view-name" class="text-xs text-[#b58a45] font-mono">Frente</span></div>
+                    <div id="detail-view-thumbs" class="viewer-view-bar"></div>
+                </div>
+            </div>
+            <div class="p-5 md:p-8 lg:pl-4">
+                <div id="detail-category" class="font-mono text-[10px] uppercase tracking-[.2em] text-[#b58a45] mb-2"></div>
+                <h2 id="detail-title" class="font-display text-3xl md:text-4xl mb-3"></h2>
+                <p id="detail-description" class="text-[#667085] leading-relaxed text-sm mb-5"></p>
+                <div class="font-mono text-2xl text-[#b58a45] mb-6">$<span id="detail-unit-price">0.00</span> <span class="text-[10px] uppercase text-[#98a2b3]">por unidad</span></div>
+
+                <div class="selection-card mb-5">
+                    <div><div class="font-mono text-[10px] uppercase tracking-wider text-[#667085]">Compra multicolor</div><div class="text-xs text-[#98a2b3] mt-1">La foto de la izquierda es solo la vista previa. Puedes combinar varios colores y tallas en el mismo pedido.</div></div>
+                    <button type="button" onclick="openSizeModal()" class="shrink-0 px-3 py-2 rounded-lg border border-[#b58a45]/40 text-[#b58a45] text-[10px] font-mono uppercase">Elegir</button>
+                </div>
+
+                <div class="border-t border-[#ebe6de] pt-5 mb-5">
+                    <div class="flex items-center justify-between gap-3 mb-3"><h3 class="font-mono text-xs uppercase tracking-wider text-[#667085]">Cantidad</h3><span id="discount-label" class="hidden text-[10px] font-mono uppercase text-[#b58a45]"></span></div>
+                    <div class="flex items-center gap-3"><button onclick="changeQty(-1)" class="btn w-11 h-11 rounded-xl bg-[#ebe5db] text-xl">−</button><input id="qty-input" type="number" min="1" max="999" value="1" onchange="setQty(this.value)" class="w-24 rounded-xl py-3 text-center font-mono"><button onclick="changeQty(1)" class="btn w-11 h-11 rounded-xl bg-[#ebe5db] text-xl">+</button></div>
+                </div>
+
+                <div class="border-t border-[#ebe6de] pt-5 mb-6">
+                    <div class="flex items-center justify-between mb-3"><h3 class="font-mono text-xs uppercase tracking-wider text-[#667085]">Colores y tallas</h3><span id="sizes-assigned" class="text-xs text-[#98a2b3]">0 / 1 asignadas</span></div>
+                    <button onclick="openSizeModal()" class="btn w-full py-3 rounded-xl border border-[#b58a45]/50 text-[#b58a45] font-mono text-xs uppercase tracking-wider hover:bg-[#b58a45] hover:text-white">Elegir colores y tallas</button>
+                    <div id="size-summary" class="mt-3 text-sm text-[#667085]">Aún no has distribuido colores y tallas.</div>
+                </div>
+
+                <div class="rounded-2xl bg-[#f2eee7] border border-[#ded7cb] p-4 mb-4 space-y-2 text-sm">
+                    <div class="flex justify-between text-[#667085]"><span>Precio unitario</span><span>$<span id="price-subtotal-unit">0.00</span></span></div>
+                    <div id="price-discount-row" class="hidden flex justify-between text-[#b58a45]"><span>Descuento</span><span>−$<span id="price-discount">0.00</span></span></div>
+                    <div class="border-t border-[#ded7cb] pt-2 flex justify-between font-semibold"><span>Total</span><span class="text-[#b58a45] text-lg">$<span id="detail-total">0.00</span></span></div>
+                </div>
+                <button onclick="openOrder()" class="btn w-full py-4 bg-[#b58a45] hover:bg-[#a97e3d] text-white rounded-xl font-mono text-sm uppercase tracking-widest font-semibold">Pedir esta prenda</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SIZE MODAL -->
+<div id="size-modal" class="modal" onclick="if(event.target===this)closeSizeModal()">
+    <div class="modal-box max-w-md p-5" onclick="event.stopPropagation()">
+        <div class="flex items-start justify-between mb-5"><div><h2 class="font-display text-2xl">Colores y tallas</h2><p class="text-xs text-[#667085] mt-1">Distribuye el pedido entre varios colores y tallas.</p></div><button onclick="closeSizeModal()" class="w-9 h-9 rounded-lg bg-[#f2eee7]">×</button></div>
+        <div id="size-color-tabs" class="flex gap-2 overflow-x-auto pb-3 mb-3"></div><div id="size-options" class="space-y-2"></div>
+        <div class="mt-4 pt-4 border-t border-[#ebe6de] flex justify-between text-sm"><span class="text-[#667085]">Total asignado</span><strong id="size-modal-total" class="text-[#b58a45] font-mono">0 / 1</strong></div>
+        <div class="grid grid-cols-2 gap-3 mt-5"><button onclick="closeSizeModal()" class="py-3 rounded-xl border border-[#ded7cb] text-xs font-mono uppercase">Cancelar</button><button onclick="applySizes()" class="py-3 rounded-xl bg-[#b58a45] text-white text-xs font-mono uppercase font-semibold">Aplicar tallas</button></div>
+    </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div id="order-modal" class="modal" onclick="if(event.target===this)closeOrderModal()">
+    <div class="modal-box max-w-lg p-5 md:p-6" onclick="event.stopPropagation()">
+        <div class="flex items-start justify-between mb-4"><div><h2 class="font-display text-2xl">Confirmar Pedido</h2><p class="text-xs text-[#667085] mt-1">Prenda terminada del catálogo JOVAFAM</p></div><button onclick="closeOrderModal()" class="w-9 h-9 rounded-lg bg-[#f2eee7]">×</button></div>
+        <div class="rounded-xl bg-[#f2eee7] border border-[#ded7cb] p-4 mb-4 flex items-center gap-3">
+            <div class="w-16 h-16 rounded-lg bg-white border border-[#ded7cb] overflow-hidden flex-shrink-0"><img id="order-preview" class="w-full h-full object-contain"></div>
+            <div class="min-w-0 flex-1"><p id="order-product-name" class="font-semibold truncate"></p><p id="order-details" class="text-xs text-[#667085] mt-1"></p><p id="order-sizes" class="text-xs text-[#667085] mt-1"></p></div>
+            <div class="font-mono text-[#b58a45] font-semibold">$<span id="order-total">0.00</span></div>
+        </div>
+
+        <form id="order-form" onsubmit="goToPayment(event)">
+            <div id="step-shipping" class="space-y-3">
+                <input name="nombre" required placeholder="Nombre completo *" class="w-full rounded-xl px-4 py-3 text-sm">
+                <input name="email" type="email" required placeholder="Correo electrónico *" class="w-full rounded-xl px-4 py-3 text-sm">
+                <input name="telefono" type="tel" required placeholder="Teléfono / WhatsApp *" class="w-full rounded-xl px-4 py-3 text-sm">
+                <div class="grid grid-cols-2 gap-3"><input name="pais" required list="country-list" placeholder="País *" class="w-full rounded-xl px-4 py-3 text-sm"><input name="ciudad" required placeholder="Ciudad *" class="w-full rounded-xl px-4 py-3 text-sm"></div>
+                <datalist id="country-list"></datalist>
+                <input name="direccion" required placeholder="Dirección completa *" class="w-full rounded-xl px-4 py-3 text-sm">
+                <div class="grid grid-cols-2 gap-3"><input name="address_extra" placeholder="Apto / Interior" class="w-full rounded-xl px-4 py-3 text-sm"><input name="postal_code" placeholder="Código postal" class="w-full rounded-xl px-4 py-3 text-sm"></div>
+                <textarea name="notas" rows="2" maxlength="300" placeholder="Notas adicionales..." class="w-full rounded-xl px-4 py-3 text-sm resize-none"></textarea>
+                <button id="continue-payment-btn" type="submit" class="btn w-full py-3.5 rounded-xl bg-[#b58a45] text-white font-mono text-xs uppercase tracking-wider font-semibold">Continuar</button>
+            </div>
+
+            <div id="step-payment" class="hidden">
+                <div class="rounded-xl bg-[#f2eee7] border border-[#ded7cb] p-4 mb-4 text-sm space-y-2"><div class="flex justify-between"><span class="text-[#667085]">Producto</span><span id="payment-product-name"></span></div><div class="flex justify-between"><span class="text-[#667085]">Cantidad</span><span id="payment-qty"></span></div><div class="flex justify-between border-t border-[#ded7cb] pt-2 font-semibold"><span>Total</span><span id="payment-total" class="text-[#b58a45]"></span></div></div>
+                <p class="font-mono text-[10px] uppercase tracking-wider text-[#b58a45] mb-3">Selecciona método de pago</p>
+                <div id="paypal-button-container" class="min-h-[45px]"></div><p id="paypal-error" class="hidden text-red-500 text-xs mt-2"></p>
+                <div class="flex items-center gap-3 my-4"><div class="h-px bg-[#ded7cb] flex-1"></div><span class="text-xs text-[#98a2b3]">O</span><div class="h-px bg-[#ded7cb] flex-1"></div></div>
+                <button type="button" id="stripe-pay-btn" onclick="payWithStripe()" class="btn w-full py-3.5 rounded-xl bg-[#1f2933] text-white font-mono text-xs uppercase tracking-wider font-semibold">Pagar con tarjeta</button><p id="stripe-error" class="hidden text-red-500 text-xs mt-2"></p>
+                <button type="button" onclick="backToShipping()" class="w-full mt-4 py-2 text-[#667085] text-xs font-mono uppercase">← Volver a envío</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer class="border-t border-[#ded7cb] bg-[#f2eee7] py-10"><div class="max-w-7xl mx-auto px-5 lg:px-8 flex flex-col sm:flex-row justify-between gap-4 text-sm text-[#667085]"><span>© 2026 JOVAFAM</span><div class="flex gap-5"><a href="inicio.html" class="hover:text-[#b58a45]">Inicio</a><a href="editor.html" class="hover:text-[#b58a45]">Personalizar una prenda</a></div></div></footer>
+
+<script>
+const SUPABASE_URL = 'https://xpdmnecyhhzsmujgptwg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZG1uZWN5aGh6c211amdwdHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4MDc1MTgsImV4cCI6MjEwMjM4MzUxOH0.lSD7nM6lOIgULpQ0pvJ3HutKClbtXIbTgApvT5Y0E1M';
+
+const SHOP_VIEWS = [
+    {id:'front', name:'Frente'},
+    {id:'back', name:'Espalda'},
+    {id:'leftShoulder', name:'Lado izq.'},
+    {id:'rightShoulder', name:'Lado der.'}
+];
+const state = {
+    catalog: { products: [] }, settings: { whatsapp:'', discounts:[], countries:['Estados Unidos'], paymentsEnabled:false, paypalClientId:'', stripePublishableKey:'', stripeEdgeUrl:'' },
+    product: null, colorIndex: 0, view: 'front', qty: 1, variants: {}, draftVariants: {}, variantColorId: null, total: 0, discountPercent: 0, client: null, tempOrderData: null
+};
+let visibleProducts = [];
+
+function escapeHtml(value){return String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
+function normalizeCatalog(input){
+    const src=(input&&typeof input==='object')?input:{};
+    const products=Array.isArray(src.products)?src.products:[];
+    return {updatedAt:src.updatedAt||null,products:products.map((raw,index)=>{
+        const p=(raw&&typeof raw==='object')?raw:{};
+        const price=Number(p.basePrice??p.price);
+        const order=Number(p.sortOrder);
+        let colors=Array.isArray(p.colors)?p.colors:[];
+        if(!colors.length) colors=[{id:'default',name:'Único',hex:'#f5f0e8',image:p.image||'',active:true}];
+        colors=colors.map((rawColor,ci)=>{
+            const c=(rawColor&&typeof rawColor==='object')?rawColor:{};
+            const images={front:'',back:'',leftShoulder:'',rightShoulder:''};
+            if(c.images && !Array.isArray(c.images) && typeof c.images==='object'){
+                for(const v of SHOP_VIEWS) images[v.id]=String(c.images[v.id]||'').trim();
+            } else if(Array.isArray(c.images)) {
+                for(const img of c.images){
+                    if(img&&SHOP_VIEWS.some(v=>v.id===img.view)) images[img.view]=String(img.src||img.url||'').trim();
+                }
+            }
+            const legacy=String(c.image||c.src||'').trim();
+            if(!images.front && legacy) images.front=legacy;
+            return {id:String(c.id||('color-'+ci)),name:String(c.name||('Color '+(ci+1))),hex:String(c.hex||'#f5f0e8'),image:images.front||legacy,images,active:c.active!==false};
+        });
+        return {id:String(p.id||('shop-'+index)),title:String(p.title||p.name||'Producto JOVAFAM'),category:String(p.category||'General'),description:String(p.description||''),tags:Array.isArray(p.tags)?p.tags:[],sku:String(p.sku||''),basePrice:Number.isFinite(price)?price:0,active:p.active!==false,featured:p.featured===true,sortOrder:Number.isFinite(order)?order:index,sizes:(Array.isArray(p.sizes)?p.sizes:String(p.sizes||'S,M,L,XL').split(',')).map(v=>String(v).trim()).filter(Boolean),colors};
+    }).sort((a,b)=>a.sortOrder-b.sortOrder)};
+}
+function getColorImage(color,view='front'){
+    if(!color) return '';
+    return String(color.images?.[view] || (view==='front'?color.image:'') || '').trim();
+}
+function getFirstColorImage(color){
+    if(!color) return '';
+    for(const v of SHOP_VIEWS){const src=getColorImage(color,v.id);if(src)return src;}
+    return String(color.image||'').trim();
+}
+function getAvailableViews(color){return SHOP_VIEWS.filter(v=>!!getColorImage(color,v.id));}
+function getSupabaseConfig(){try{const x=JSON.parse(localStorage.getItem('jovafam_supabase')||'null');if(x?.url&&x?.key)return x}catch(e){}return{url:SUPABASE_URL,key:SUPABASE_KEY};}
+function initSupabase(){const cfg=getSupabaseConfig();if(window.supabase&&cfg.url&&cfg.key){state.client=window.supabase.createClient(cfg.url,cfg.key);return state.client}return null;}
+
+async function loadData(){
+    initSupabase();
+
+    let localShop=null;
+    let remoteShop=null;
+    let remoteSettings=null;
+    let remoteUpdatedAt='';
+
+    try{localShop=JSON.parse(localStorage.getItem('jovafam_shop_catalog')||'null')}catch(e){console.warn('Cache de tienda invalida:',e)}
+    state.catalog=normalizeCatalog(localShop||{products:[]});
+
+    try{state.settings={...state.settings,...JSON.parse(localStorage.getItem('jovafam_settings')||'{}')}}catch(e){}
+
+    // Mostrar la cache inmediatamente: la interfaz nunca debe quedarse congelada por Supabase.
+    renderCategories();
+    renderCatalog();
+    renderCountries();
+    if((state.catalog.products||[]).length){
+        document.getElementById('catalog-loading')?.classList.add('hidden');
+    }
+
+    const withTimeout=(promise,ms,label)=>Promise.race([
+        promise,
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' excedio '+ms+' ms')),ms))
+    ]);
+
+    if(state.client){
+        try{
+            const [shopRes,settingsRes]=await withTimeout(Promise.all([
+                state.client.from('site_data').select('value,updated_at').eq('key','shop_catalog').maybeSingle(),
+                state.client.from('site_data').select('value,updated_at').eq('key','settings').maybeSingle()
+            ]),7000,'Carga del catalogo');
+            if(shopRes.error) console.warn('Supabase shop_catalog:',shopRes.error);
+            if(settingsRes.error) console.warn('Supabase settings:',settingsRes.error);
+            if(!shopRes.error&&shopRes.data?.value){remoteShop=shopRes.data.value;remoteUpdatedAt=shopRes.data.updated_at||'';}
+            if(!settingsRes.error&&settingsRes.data?.value)remoteSettings=settingsRes.data.value;
+        }catch(e){console.warn('No se pudo cargar Supabase a tiempo:',e);}
+    }
+
+    // Fallback REST directo si el SDK fallo o quedo sin datos.
+    if(!remoteShop){
+        try{
+            const cfg=getSupabaseConfig();
+            if(cfg?.url&&cfg?.key){
+                const controller=new AbortController();
+                const timer=setTimeout(()=>controller.abort(),6000);
+                const res=await fetch(cfg.url.replace(/\/$/,'')+'/rest/v1/site_data?select=value,updated_at&key=eq.shop_catalog',{
+                    headers:{apikey:cfg.key,Authorization:'Bearer '+cfg.key,Accept:'application/json'},
+                    signal:controller.signal,cache:'no-store'
+                });
+                clearTimeout(timer);
+                if(res.ok){const rows=await res.json();if(Array.isArray(rows)&&rows[0]?.value){remoteShop=rows[0].value;remoteUpdatedAt=rows[0].updated_at||'';}}
+                else console.warn('REST shop_catalog HTTP',res.status);
+            }
+        }catch(e){console.warn('Fallback REST de tienda fallo:',e);}
+    }
+
+    if(remoteShop){
+        const normalizedRemote=normalizeCatalog(remoteShop);
+        const localVersion=Date.parse(state.catalog?.updatedAt||'')||0;
+        const remoteVersion=Math.max(Date.parse(normalizedRemote?.updatedAt||'')||0,Date.parse(remoteUpdatedAt||'')||0);
+        if(!(state.catalog.products||[]).length || remoteVersion>=localVersion){state.catalog=normalizedRemote;}
+    }
+
+    if(remoteSettings) state.settings={...state.settings,...remoteSettings};
+
+    try{
+        const legacyPay=JSON.parse(localStorage.getItem('jovafam_payments')||'{}');
+        if(!state.settings.paypalClientId)state.settings.paypalClientId=legacyPay.paypalClientId||'';
+        if(!state.settings.stripePublishableKey)state.settings.stripePublishableKey=legacyPay.stripePublishableKey||'';
+        if(!state.settings.stripeEdgeUrl)state.settings.stripeEdgeUrl=legacyPay.stripeEdgeUrl||'';
+    }catch(e){}
+    if(!remoteSettings||typeof remoteSettings.paymentsEnabled!=='boolean')state.settings.paymentsEnabled=localStorage.getItem('jovafam_payments_enabled')==='true';
+
+    try{localStorage.setItem('jovafam_shop_catalog',JSON.stringify(state.catalog));localStorage.setItem('jovafam_settings',JSON.stringify(state.settings));}catch(e){}
+
+    renderCategories();renderCatalog();renderCountries();
+    document.getElementById('catalog-loading')?.classList.add('hidden');
+
+    const requested=new URLSearchParams(location.search).get('product');
+    if(requested){const p=state.catalog.products.find(x=>x.id===requested&&x.active);if(p)setTimeout(()=>openProduct(p.id),50)}
+}
+
+function renderCategories(){const sel=document.getElementById('category-filter');const cats=[...new Set(state.catalog.products.filter(p=>p.active).map(p=>p.category).filter(Boolean))].sort();sel.innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');}
+function getCover(p){const active=(p.colors||[]).filter(c=>c.active);for(const c of active){const src=getFirstColorImage(c);if(src)return src}for(const c of (p.colors||[])){const src=getFirstColorImage(c);if(src)return src}return '';}
+function renderCatalog(){
+    const term=(document.getElementById('catalog-search')?.value||'').trim().toLowerCase(); const cat=document.getElementById('category-filter')?.value||'';
+    visibleProducts=state.catalog.products.filter(p=>p.active).filter(p=>!cat||p.category===cat).filter(p=>!term||[p.title,p.category,p.description,...(p.tags||[])].join(' ').toLowerCase().includes(term));
+    const grid=document.getElementById('catalog-grid'), empty=document.getElementById('catalog-empty'); grid.classList.toggle('hidden',!visibleProducts.length); empty.classList.toggle('hidden',!!visibleProducts.length);
+    grid.innerHTML=visibleProducts.map((p,i)=>{const cover=getCover(p);const colors=(p.colors||[]).filter(c=>c.active);const dots=colors.slice(0,6).map(c=>`<span class="w-3 h-3 rounded-full border border-[#d8d1c6]" style="background:${escapeHtml(c.hex)}" title="${escapeHtml(c.name)}"></span>`).join('');return `<article class="card rounded-2xl overflow-hidden cursor-pointer" onclick="openProductByVisibleIndex(${i})"><div class="aspect-[4/5] bg-[#f2eee7] overflow-hidden relative flex items-center justify-center">${cover?`<img src="${escapeHtml(cover)}" alt="${escapeHtml(p.title)}" class="product-image w-full h-full object-contain p-3">`:'<span class="text-[#98a2b3] text-xs">Sin imagen</span>'}${p.featured?'<span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#b58a45] text-white text-[10px] font-mono uppercase">Destacado</span>':''}</div><div class="p-4"><div class="font-mono text-[10px] uppercase tracking-widest text-[#b58a45] mb-1">${escapeHtml(p.category)}</div><h2 class="font-display text-xl mb-2">${escapeHtml(p.title)}</h2><div class="flex items-center justify-between gap-3"><span class="font-mono text-[#b58a45]">$${p.basePrice.toFixed(2)}</span><span class="flex gap-1">${dots}</span></div><div class="text-[11px] text-[#98a2b3] mt-2">${p.sizes.map(escapeHtml).join(' · ')}</div><button class="mt-4 w-full py-2.5 rounded-xl border border-[#b58a45]/40 text-[#b58a45] font-mono text-[10px] uppercase tracking-wider">Elegir color y tallas</button></div></article>`}).join('');
+    if(window.lucide) lucide.createIcons();
+}
+function openProductByVisibleIndex(i){const p=visibleProducts[i];if(p)openProduct(p.id)}
+function openProduct(id){
+    const p=state.catalog.products.find(x=>x.id===id&&x.active);if(!p)return;state.product=p;state.colorIndex=Math.max(0,p.colors.findIndex(c=>c.active));state.view='front';state.qty=1;state.variants={};state.draftVariants={};state.variantColorId=null;
+    document.getElementById('detail-category').textContent=p.category;document.getElementById('detail-title').textContent=p.title;document.getElementById('detail-description').textContent=p.description||'Prenda terminada JOVAFAM lista para pedir.';document.getElementById('detail-unit-price').textContent=p.basePrice.toFixed(2);document.getElementById('qty-input').value='1';
+    renderProductOptions();updatePrice();document.getElementById('product-modal').classList.add('active');history.replaceState(null,'',`catalogo.html?product=${encodeURIComponent(p.id)}`);document.body.style.overflow='hidden';lucide.createIcons();
+}
+function closeProductModal(){document.getElementById('product-modal').classList.remove('active');history.replaceState(null,'','catalogo.html');if(!document.getElementById('order-modal').classList.contains('active')&&!document.getElementById('size-modal').classList.contains('active'))document.body.style.overflow='';}
+function currentColor(){return state.product?.colors?.[state.colorIndex]||null;}
+function selectBestViewForColor(color,preferred='front'){
+    if(getColorImage(color,preferred)) return preferred;
+    const first=getAvailableViews(color)[0];
+    return first?.id||'front';
+}
+function renderProductOptions(){
+    const p=state.product;if(!p)return;
+    const colors=(p.colors||[]).filter(c=>c.active);if(!colors.length)return;
+    const selectedId=currentColor()?.id;
+    state.colorIndex=p.colors.findIndex(c=>c.id===selectedId&&c.active);
+    if(state.colorIndex<0)state.colorIndex=p.colors.findIndex(c=>c.active);
+    const c=currentColor();
+    state.view=selectBestViewForColor(c,state.view);
+    const currentSrc=getColorImage(c,state.view);
+    const img=document.getElementById('detail-image'),no=document.getElementById('detail-no-image');
+    if(currentSrc){img.src=currentSrc;img.alt=p.title+' - '+c.name+' - '+(SHOP_VIEWS.find(v=>v.id===state.view)?.name||state.view);img.classList.remove('hidden');no.classList.add('hidden')}else{img.classList.add('hidden');no.classList.remove('hidden')}
+    document.getElementById('selected-color-name').textContent=c?.name||'';
+    document.getElementById('selected-view-name').textContent=SHOP_VIEWS.find(v=>v.id===state.view)?.name||'Vista';
+    document.querySelectorAll('.viewer-nav').forEach(btn=>btn.style.display=getAvailableViews(c).length>1?'flex':'none');
+    document.getElementById('detail-colors').innerHTML=p.colors.map((color,idx)=>color.active?`<button type="button" onclick="selectColor(${idx})" class="viewer-color-btn ${idx===state.colorIndex?'active':''}" title="${escapeHtml(color.name)}"><span class="viewer-color-dot" style="background:${escapeHtml(color.hex)}"></span><span>${escapeHtml(color.name)}</span></button>`:'').join('');
+    const viewsEl=document.getElementById('detail-view-thumbs');
+    viewsEl.innerHTML=SHOP_VIEWS.map(v=>{
+        const src=getColorImage(c,v.id);const active=v.id===state.view;
+        return `<button type="button" class="viewer-view-btn ${active?'active':''} ${src?'':'disabled'}" ${src?`onclick="selectView('${v.id}')"`:''} aria-label="${escapeHtml(v.name)}">${escapeHtml(v.name)}</button>`;
+    }).join('');
+    updateSizeSummary();
+}
+function selectColor(i){if(!state.product?.colors?.[i]?.active)return;state.colorIndex=i;state.view=selectBestViewForColor(currentColor(),'front');renderProductOptions();}
+function selectView(view){const c=currentColor();if(!SHOP_VIEWS.some(v=>v.id===view)||!getColorImage(c,view))return;state.view=view;renderProductOptions();}
+function cycleProductView(delta){
+    const c=currentColor();if(!c)return;
+    const available=SHOP_VIEWS.filter(v=>getColorImage(c,v.id));if(available.length<2)return;
+    let idx=available.findIndex(v=>v.id===state.view);if(idx<0)idx=0;
+    idx=(idx+delta+available.length)%available.length;
+    state.view=available[idx].id;renderProductOptions();
+}
+
+function setQty(value){
+    const q=Math.max(1,Math.min(999,parseInt(value)||1));
+    state.qty=q;
+    document.getElementById('qty-input').value=q;
+    updateSizeSummary();
+    updatePrice();
+}
+function changeQty(delta){setQty(state.qty+delta)}
+
+function cloneVariants(matrix){return JSON.parse(JSON.stringify(matrix||{}))}
+function getAssignedTotal(obj=state.variants){
+    return Object.values(obj||{}).reduce((grand,sizeMap)=>
+        grand+Object.values(sizeMap||{}).reduce((sum,q)=>sum+(Number(q)||0),0),0);
+}
+function getColorAssigned(colorId,obj=state.variants){
+    return Object.values(obj?.[colorId]||{}).reduce((sum,q)=>sum+(Number(q)||0),0);
+}
+function variantParts(obj=state.variants){
+    if(!state.product)return[];
+    return (state.product.colors||[]).map(color=>{
+        const sizes=Object.entries(obj?.[color.id]||{}).filter(([,q])=>Number(q)>0).map(([s,q])=>`${s}: ${Number(q)}`);
+        return sizes.length?`${color.name} — ${sizes.join(', ')}`:'';
+    }).filter(Boolean);
+}
+function sizeText(){return variantParts().join(' | ')}
+function colorText(){
+    if(!state.product)return'';
+    return (state.product.colors||[])
+        .map(c=>({name:c.name,qty:getColorAssigned(c.id)}))
+        .filter(x=>x.qty>0)
+        .map(x=>`${x.name}: ${x.qty}`)
+        .join(' | ');
+}
+function updateSizeSummary(){
+    const total=getAssignedTotal();
+    document.getElementById('sizes-assigned').textContent=`${total} / ${state.qty} asignadas`;
+    const parts=variantParts();
+    document.getElementById('size-summary').textContent=parts.length?parts.join(' · '):'Aún no has distribuido colores y tallas.';
+}
+function openSizeModal(){
+    if(!state.product)return;
+    state.draftVariants=cloneVariants(state.variants);
+    for(const color of (state.product.colors||[]).filter(c=>c.active)){
+        state.draftVariants[color.id] ||= {};
+        for(const size of state.product.sizes) state.draftVariants[color.id][size]=Number(state.draftVariants[color.id][size]||0);
+    }
+    const preview=currentColor();
+    state.variantColorId=(preview?.active?preview.id:null) || (state.product.colors.find(c=>c.active)?.id||null);
+    renderSizeModal();
+    document.getElementById('size-modal').classList.add('active');
+    document.body.style.overflow='hidden';
+}
+function closeSizeModal(){
+    document.getElementById('size-modal').classList.remove('active');
+    if(!document.getElementById('product-modal').classList.contains('active')&&!document.getElementById('order-modal').classList.contains('active'))document.body.style.overflow='';
+}
+function selectVariantColor(colorId){
+    if(!state.product?.colors?.some(c=>c.id===colorId&&c.active))return;
+    state.variantColorId=colorId;
+    renderSizeModal();
+}
+function renderSizeModal(){
+    const colors=(state.product?.colors||[]).filter(c=>c.active);
+    const tabs=document.getElementById('size-color-tabs');
+    const container=document.getElementById('size-options');
+    if(!colors.length){tabs.innerHTML='';container.innerHTML='<p class="text-sm text-[#667085]">No hay colores activos.</p>';return}
+
+    if(!colors.some(c=>c.id===state.variantColorId))state.variantColorId=colors[0].id;
+    const active=colors.find(c=>c.id===state.variantColorId)||colors[0];
+
+    tabs.innerHTML=colors.map(c=>{
+        const count=getColorAssigned(c.id,state.draftVariants);
+        return `<button type="button" data-variant-color="${escapeHtml(c.id)}" class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border ${c.id===active.id?'border-[#b58a45] bg-[#b58a45]/10 text-[#b58a45]':'border-[#ded7cb] bg-white text-[#667085]'}"><span class="w-4 h-4 rounded-full border border-[#ded7cb]" style="background:${escapeHtml(c.hex)}"></span><span class="text-xs">${escapeHtml(c.name)}</span><span class="font-mono text-xs">${count}</span></button>`;
+    }).join('');
+    tabs.querySelectorAll('[data-variant-color]').forEach(btn=>btn.addEventListener('click',()=>selectVariantColor(btn.dataset.variantColor)));
+
+    const sizeMap=state.draftVariants[active.id]||{};
+    container.innerHTML=(state.product?.sizes||[]).map((size,index)=>`<div class="flex items-center justify-between p-3 rounded-xl bg-[#f2eee7] border border-[#ded7cb] gap-3"><button type="button" class="flex-1 text-left font-mono text-sm py-2" data-size-index="${index}" data-size-delta="1">${escapeHtml(size)}</button><div class="flex items-center gap-2"><button type="button" data-size-index="${index}" data-size-delta="-1" class="w-10 h-10 rounded-lg bg-white border border-[#ded7cb] text-lg">−</button><span class="w-9 text-center font-mono text-[#b58a45]">${Number(sizeMap[size]||0)}</span><button type="button" data-size-index="${index}" data-size-delta="1" class="w-10 h-10 rounded-lg bg-[#b58a45] text-white text-lg">+</button></div></div>`).join('');
+
+    container.querySelectorAll('[data-size-index]').forEach(btn=>btn.addEventListener('click',ev=>{
+        ev.preventDefault();ev.stopPropagation();
+        const size=state.product?.sizes?.[Number(btn.dataset.sizeIndex)];
+        if(size!==undefined)changeDraftSize(size,Number(btn.dataset.sizeDelta));
+    }));
+    document.getElementById('size-modal-total').textContent=`${getAssignedTotal(state.draftVariants)} / ${state.qty}`;
+}
+function changeDraftSize(size,delta){
+    const map=state.draftVariants[state.variantColorId] ||= {};
+    const cur=Number(map[size]||0);
+    if(delta<0){map[size]=Math.max(0,cur-1);renderSizeModal();return}
+    const total=getAssignedTotal(state.draftVariants);
+    if(total>=state.qty){
+        if(confirm(`Ya distribuiste ${state.qty} prenda${state.qty===1?'':'s'}. ¿Quieres agregar una unidad más?`)){
+            state.qty++;
+            document.getElementById('qty-input').value=state.qty;
+            updatePrice();
+        }else return;
+    }
+    map[size]=cur+1;
+    renderSizeModal();
+}
+function applySizes(){
+    const total=getAssignedTotal(state.draftVariants);
+    if(total===0){alert('Selecciona al menos un color y una talla.');return}
+    if(total!==state.qty){alert(`Debes distribuir exactamente ${state.qty} prenda${state.qty===1?'':'s'}. Ahora tienes ${total}.`);return}
+    state.variants=cloneVariants(state.draftVariants);
+    closeSizeModal();
+    updateSizeSummary();
+    updatePrice();
+}
+function getDiscountPercent(){const list=[...(state.settings.discounts||[])].sort((a,b)=>Number(b.qty)-Number(a.qty));for(const d of list){if(state.qty>=Number(d.qty||0))return Number(d.percent||0)}return 0}
+function updatePrice(){if(!state.product)return;const unit=Number(state.product.basePrice||0);const pct=getDiscountPercent();const unitDiscount=unit*(pct/100);state.total=(unit-unitDiscount)*state.qty;state.discountPercent=pct;document.getElementById('price-subtotal-unit').textContent=unit.toFixed(2);document.getElementById('detail-total').textContent=state.total.toFixed(2);const row=document.getElementById('price-discount-row'),lbl=document.getElementById('discount-label');if(pct>0){row.classList.remove('hidden');lbl.classList.remove('hidden');document.getElementById('price-discount').textContent=(unitDiscount*state.qty).toFixed(2);lbl.textContent=`Descuento ${pct}%`}else{row.classList.add('hidden');lbl.classList.add('hidden')}}
+
+function renderCountries(){const list=Array.isArray(state.settings.countries)&&state.settings.countries.length?state.settings.countries:['Estados Unidos'];document.getElementById('country-list').innerHTML=list.map(c=>`<option value="${escapeHtml(c)}"></option>`).join('');const form=document.getElementById('order-form');if(form?.pais&&!form.pais.value)form.pais.value=list[0]||'Estados Unidos';}
+function openOrder(){
+    if(!state.product)return;
+    const assigned=getAssignedTotal();
+    if(assigned!==state.qty){
+        alert(`Antes de pedir debes distribuir cada prenda entre color y talla. Cantidad: ${state.qty}. Asignadas: ${assigned}.`);
+        openSizeModal();
+        return;
+    }
+
+    const purchasedColors=(state.product.colors||[]).filter(c=>getColorAssigned(c.id)>0);
+    const previewColor=purchasedColors[0]||currentColor();
+    const preview=getColorImage(previewColor,'front')||getFirstColorImage(previewColor);
+    if(!preview){alert('Las variantes seleccionadas no tienen fotografías publicadas.');return}
+
+    document.getElementById('order-preview').src=preview;
+    document.getElementById('order-product-name').textContent=state.product.title;
+    document.getElementById('order-details').textContent=`${colorText()} · ${state.qty} unidad${state.qty===1?'':'es'}`;
+    document.getElementById('order-sizes').textContent=sizeText();
+    document.getElementById('order-total').textContent=state.total.toFixed(2);
+    document.getElementById('step-shipping').classList.remove('hidden');
+    document.getElementById('step-payment').classList.add('hidden');
+    renderCountries();
+    document.getElementById('order-modal').classList.add('active');
+    document.body.style.overflow='hidden';
+}
+function closeOrderModal(){document.getElementById('order-modal').classList.remove('active');if(!document.getElementById('product-modal').classList.contains('active'))document.body.style.overflow='';}
+function makeLocalOrderRecord(){
+    const token=(crypto.randomUUID?crypto.randomUUID():('local-'+Date.now()+'-'+Math.random().toString(36).slice(2)));
+    const orderId='LOCAL-'+Date.now().toString(36).toUpperCase();
+    const purchasedColors=(state.product?.colors||[]).filter(c=>getColorAssigned(c.id,state.tempOrderData?.variants||state.variants)>0);
+    const designViews=[];
+    for(const color of purchasedColors){
+        for(const v of SHOP_VIEWS){
+            const url=getColorImage(color,v.id);
+            if(url) designViews.push({view:`Producto catálogo - ${color.name} - ${v.name}`,url,colorId:color.id,colorName:color.name,quantity:getColorAssigned(color.id,state.tempOrderData?.variants||state.variants)});
+        }
+    }
+    return {
+        order_id:orderId, token, created_at:new Date().toISOString(),
+        customer_name:state.tempOrderData.nombre, customer_email:state.tempOrderData.email, customer_phone:state.tempOrderData.telefono,
+        country:state.tempOrderData.pais, city:state.tempOrderData.ciudad, address:state.tempOrderData.direccion,
+        address_extra:state.tempOrderData.addressExtra||'', postal_code:state.tempOrderData.postalCode||'',
+        product_name:state.product.title, product_size:state.tempOrderData.talla, product_color:state.tempOrderData.colorName,
+        quantity:state.qty, total_price:state.tempOrderData.totalPrice,
+        design_url:designViews[0]?.url||'', design_views:designViews,
+        payment_status:'pending', payment_method:'local-backup', local_only:true
+    };
+}
+function saveLocalOrderBackup(){
+    const order=makeLocalOrderRecord();
+    try{
+        let list=JSON.parse(localStorage.getItem('jovafam_local_orders')||'[]');
+        list=[order,...list.filter(x=>x.token!==order.token)].slice(0,50);
+        localStorage.setItem('jovafam_local_orders',JSON.stringify(list));
+        let history=JSON.parse(localStorage.getItem('jovafam_order_history')||'[]');
+        history=[{token:order.token,order_id:order.order_id,customer:order.customer_name,product:order.product_name,date:new Date(order.created_at).toLocaleDateString('es-ES')},...history].slice(0,20);
+        localStorage.setItem('jovafam_order_history',JSON.stringify(history));
+    }catch(e){console.warn('No se pudo guardar respaldo local del pedido:',e)}
+    return {orderId:order.order_id,token:order.token,local:true};
+}
+async function createOrderWithFallback(){
+    try{
+        return await Promise.race([
+            createOrderInSupabase('pending','manual',null),
+            new Promise((_,reject)=>setTimeout(()=>reject(new Error('Supabase no respondio en 7 segundos')),7000))
+        ]);
+    }catch(err){
+        console.warn('Pedido remoto fallido; se usara respaldo local:',err);
+        return saveLocalOrderBackup();
+    }
+}
+
+async function goToPayment(e){
+    e.preventDefault();
+    const form=e.target;
+    const assigned=getAssignedTotal();
+    if(assigned!==state.qty){
+        alert('Los colores y tallas ya no coinciden con la cantidad. Revísalos antes de continuar.');
+        return;
+    }
+
+    state.tempOrderData={
+        nombre:form.nombre.value.trim(),
+        email:form.email.value.trim(),
+        telefono:form.telefono.value.trim(),
+        pais:form.pais.value.trim(),
+        ciudad:form.ciudad.value.trim(),
+        direccion:form.direccion.value.trim(),
+        addressExtra:(form.address_extra.value||'').trim(),
+        postalCode:(form.postal_code.value||'').trim(),
+        notas:(form.notas.value||'').trim(),
+        talla:sizeText(),
+        colorName:colorText(),
+        totalPrice:state.total,
+        variants:cloneVariants(state.variants)
+    };
+
+    if(!state.settings.paymentsEnabled){
+        const btn=document.getElementById('continue-payment-btn');
+        const old=btn.textContent;
+        btn.disabled=true;
+        btn.textContent='Guardando pedido...';
+        try{
+            const result=await createOrderWithFallback();
+            if(result)await finalizeOrder(result.orderId,result.token,result.local===true);
+        }catch(err){
+            console.error(err);
+            alert('No se pudo conservar el pedido: '+err.message);
+        }finally{
+            btn.disabled=false;
+            btn.textContent=old;
+        }
+        return;
+    }
+
+    document.getElementById('step-shipping').classList.add('hidden');
+    document.getElementById('step-payment').classList.remove('hidden');
+    document.getElementById('payment-product-name').textContent=state.product.title;
+    document.getElementById('payment-qty').textContent=state.qty;
+    document.getElementById('payment-total').textContent='$'+state.total.toFixed(2);
+    renderPayPalButton(state.total);
+}
+function backToShipping(){document.getElementById('step-payment').classList.add('hidden');document.getElementById('step-shipping').classList.remove('hidden')}
+async function createOrderInSupabase(paymentStatus,paymentMethod,transactionId){
+    const client=state.client||initSupabase();
+    if(!client)throw new Error('Supabase no está configurado.');
+
+    const purchasedColors=(state.product.colors||[]).filter(
+        c=>getColorAssigned(c.id,state.tempOrderData?.variants||state.variants)>0
+    );
+    if(!purchasedColors.length)throw new Error('No hay colores y tallas asignados.');
+
+    const designViews=[];
+    let designUrl='';
+
+    for(const color of purchasedColors){
+        const colorQty=getColorAssigned(color.id,state.tempOrderData?.variants||state.variants);
+        for(const v of SHOP_VIEWS){
+            const url=getColorImage(color,v.id);
+            if(!url)continue;
+            designViews.push({
+                view:`Producto catálogo - ${color.name} - ${v.name}`,
+                url,
+                colorId:color.id,
+                colorName:color.name,
+                quantity:colorQty
+            });
+            if(!designUrl && v.id==='front')designUrl=url;
+            if(!designUrl)designUrl=url;
+        }
+    }
+
+    if(!designViews.length)throw new Error('Las variantes seleccionadas no tienen fotografías publicadas.');
+
+    const {data,error}=await client.rpc('create_order',{
+        p_customer_name:state.tempOrderData.nombre,
+        p_customer_email:state.tempOrderData.email,
+        p_customer_phone:state.tempOrderData.telefono,
+        p_country:state.tempOrderData.pais,
+        p_city:state.tempOrderData.ciudad,
+        p_address:state.tempOrderData.direccion,
+        p_address_extra:state.tempOrderData.addressExtra||'',
+        p_postal_code:state.tempOrderData.postalCode||'',
+        p_product_name:state.product.title,
+        p_product_size:state.tempOrderData.talla,
+        p_product_color:state.tempOrderData.colorName,
+        p_quantity:state.qty,
+        p_total_price:state.tempOrderData.totalPrice,
+        p_design_url:designUrl,
+        p_design_views:designViews,
+        p_payment_status:paymentStatus,
+        p_payment_method:paymentMethod,
+        p_payment_transaction_id:transactionId
+    });
+    if(error||!data||!data.length)throw new Error(error?.message||'Respuesta vacía al crear el pedido.');
+    return{orderId:data[0].order_id,token:data[0].token};
+}
+async function finalizeOrder(orderId,token,isLocal=false){
+    const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+    const link=isLocal?'':base+'order.html?token='+encodeURIComponent(token);
+    let msg=`NUEVO PEDIDO #${orderId}
+
+CLIENTE
+Nombre: ${state.tempOrderData.nombre}
+Correo: ${state.tempOrderData.email}
+Telefono: ${state.tempOrderData.telefono}
+
+DIRECCION
+Pais: ${state.tempOrderData.pais}
+Ciudad: ${state.tempOrderData.ciudad}
+Direccion: ${state.tempOrderData.direccion}
+`;
+    if(state.tempOrderData.addressExtra)msg+=`Info adicional: ${state.tempOrderData.addressExtra}
+`;
+    if(state.tempOrderData.postalCode)msg+=`Codigo postal: ${state.tempOrderData.postalCode}
+`;
+    msg+=`
+PRODUCTO DE CATALOGO
+Producto: ${state.product.title}
+Colores: ${state.tempOrderData.colorName}
+Distribucion: ${state.tempOrderData.talla}
+Cantidad: ${state.qty}
+Precio total: $${state.tempOrderData.totalPrice.toFixed(2)}
+`;
+    if(link) msg+=`
+ABRIR PEDIDO ONLINE:
+${link}`;
+    else msg+=`
+RESPALDO LOCAL: Supabase no estuvo disponible al guardar. El pedido quedo conservado en este navegador.`;
+    if(state.tempOrderData.notas)msg+=`
+
+NOTAS: ${state.tempOrderData.notas}`;
+    closeOrderModal();
+    const whatsapp=String(state.settings.whatsapp||'').replace(/\D/g,'');
+    if(whatsapp)window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(msg),'_blank');
+    else alert(isLocal?`Pedido ${orderId} guardado localmente. Supabase no estuvo disponible.`:`Pedido #${orderId} guardado correctamente.
+
+${link}`);
+}
+
+
+function renderPayPalButton(amount){const cont=document.getElementById('paypal-button-container'),err=document.getElementById('paypal-error');cont.innerHTML='';const id=String(state.settings.paypalClientId||'').trim();if(!id){err.textContent='PayPal no está configurado.';err.classList.remove('hidden');return}err.classList.add('hidden');document.getElementById('paypal-script')?.remove();const sc=document.createElement('script');sc.id='paypal-script';sc.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(id)+'&currency=USD&intent=capture';sc.onload=()=>{if(!window.paypal){err.textContent='No se pudo cargar PayPal.';err.classList.remove('hidden');return}window.paypal.Buttons({style:{layout:'vertical',color:'gold',shape:'rect',label:'pay'},createOrder:(data,actions)=>actions.order.create({purchase_units:[{amount:{value:amount.toFixed(2),currency_code:'USD'},description:'Pedido JOVAFAM - '+state.product.title}]}),onApprove:(data,actions)=>actions.order.capture().then(details=>proceedWithOrder('paypal',details.id)),onError:e=>{console.error(e);alert('Hubo un error con PayPal.')}}).render('#paypal-button-container')};sc.onerror=()=>{err.textContent='No se pudo cargar PayPal.';err.classList.remove('hidden')};document.head.appendChild(sc)}
+async function proceedWithOrder(method,transaction){try{const result=await createOrderInSupabase('paid',method,transaction);if(result)await finalizeOrder(result.orderId,result.token)}catch(e){alert('Error al guardar el pedido: '+e.message)}}
+function loadStripeScript(){return new Promise((resolve,reject)=>{if(window.Stripe)return resolve();const s=document.createElement('script');s.src='https://js.stripe.com/v3/';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}
+async function updateOrderPayment(token,status,method,transaction){const client=state.client||initSupabase();if(!client)throw new Error('Supabase no está configurado.');const{data,error}=await client.rpc('jf_update_order_payment_by_token',{p_token:String(token||''),p_payment_status:String(status||''),p_payment_method:String(method||''),p_payment_transaction_id:transaction==null?null:String(transaction)});if(error)throw error;if(data!==true)throw new Error('No se encontró el pedido para actualizar el pago.')}
+async function payWithStripe(){const btn=document.getElementById('stripe-pay-btn'),err=document.getElementById('stripe-error');const key=String(state.settings.stripePublishableKey||'').trim();if(!key){err.textContent='Stripe no está configurado.';err.classList.remove('hidden');return}err.classList.add('hidden');const old=btn.textContent;btn.disabled=true;btn.textContent='Procesando...';try{await loadStripeScript();const result=await createOrderInSupabase('pending','stripe',null);if(!result)return;const edge=String(state.settings.stripeEdgeUrl||'').trim();if(edge){const res=await fetch(edge,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getSupabaseConfig().key},body:JSON.stringify({amount:state.tempOrderData.totalPrice,order_token:result.token,product_name:state.product.title})});const data=await res.json();if(data.url){location.href=data.url;return}}const ok=confirm(`DEMO: No hay Edge Function configurada. ¿Simular pago de $${state.tempOrderData.totalPrice.toFixed(2)}?`);if(ok){await updateOrderPayment(result.token,'paid','stripe','demo_'+Date.now());await finalizeOrder(result.orderId,result.token)}}catch(e){console.error(e);alert('Error: '+e.message)}finally{btn.disabled=false;btn.textContent=old}}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    if(window.lucide) lucide.createIcons();
+    loadData().catch(err=>{
+        console.error('Error iniciando catalogo:',err);
+        document.getElementById('catalog-loading')?.classList.add('hidden');
+        document.getElementById('catalog-grid')?.classList.add('hidden');
+        document.getElementById('catalog-empty')?.classList.remove('hidden');
+    });
+});
+</script>
+</body>
+</html>
